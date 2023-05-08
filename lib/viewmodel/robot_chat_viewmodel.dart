@@ -13,6 +13,7 @@ class RobotChatViewModel with ChangeNotifier {
 
   String get apiKey => _apiKey;
 
+  final List<OpenAIChatCompletionChoiceMessageModel> _currentMessageList = [];
   final List<Message> _messageList = [];
 
   List<Message> get messageList => _messageList;
@@ -54,13 +55,14 @@ class RobotChatViewModel with ChangeNotifier {
 
   void _chatWithRobot(String messageContent, OpenAI openAI) async {
     try {
-      final result =
-          await openAI.chat.create(model: "gpt-3.5-turbo", messages: [
-        OpenAIChatCompletionChoiceMessageModel(
-            role: OpenAIChatMessageRole.user, content: messageContent)
-      ]);
+      final messageModel = OpenAIChatCompletionChoiceMessageModel(
+          role: OpenAIChatMessageRole.user, content: messageContent);
+      _currentMessageList.add(messageModel);
+      final result = await openAI.chat
+          .create(model: "gpt-3.5-turbo", messages: _currentMessageList);
       if (result.choices.isEmpty) return;
       final message = result.choices.first.message;
+      _currentMessageList.add(message);
       _notifyChange(() {
         _messageList.insert(
             0,
