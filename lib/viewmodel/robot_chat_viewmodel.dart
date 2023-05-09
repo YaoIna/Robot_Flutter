@@ -38,12 +38,17 @@ class RobotChatViewModel {
 
   UiStateCubit get uiStateCubit => _uiStateCubit;
 
+  final ScrollToTopCubit _scrollCommandCubit = ScrollToTopCubit();
+
+  ScrollToTopCubit get scrollCommandCubit => _scrollCommandCubit;
+
   void sendMessage(String messageContent) {
     if (messageContent.isEmpty) return;
     OpenAI.apiKey = Env.apiKey;
     final openAI = OpenAI.instance;
     if (openAI != null) {
       _listBloc.add(AddMessageEvent(Message(messageContent, Role.user)));
+      _scrollCommandCubit.updateCommand();
       _chatWithRobot(messageContent, openAI);
     } else {
       _uiStateCubit.updateState(UiError("Please enter your API key"));
@@ -65,6 +70,7 @@ class RobotChatViewModel {
           message.role == OpenAIChatMessageRole.user
               ? Role.user
               : Role.robot)));
+      _scrollCommandCubit.updateCommand();
     } on RequestFailedException catch (e) {
       _uiStateCubit.updateState(UiError(e.message));
     }

@@ -79,8 +79,10 @@ class _MessageCardState extends State<MessageCard> {
 
 class MessageInput extends StatefulWidget {
   final Function(String) onSendClick;
+  final FocusNode focusNode;
 
-  const MessageInput({super.key, required this.onSendClick});
+  const MessageInput(
+      {super.key, required this.onSendClick, required this.focusNode});
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -108,11 +110,11 @@ class _MessageInputState extends State<MessageInput> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
+                    focusNode: widget.focusNode,
                     maxLines: null,
+                    textInputAction: TextInputAction.send,
                     onSubmitted: (value) {
-                      widget.onSendClick(value);
-                      _textEditingController.clear();
-                      FocusScope.of(context).unfocus();
+                      _onClickSend(value);
                     },
                     controller: _textEditingController,
                     decoration: InputDecoration(
@@ -134,9 +136,7 @@ class _MessageInputState extends State<MessageInput> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  widget.onSendClick(_textEditingController.text);
-                  _textEditingController.clear();
-                  FocusScope.of(context).unfocus();
+                  _onClickSend(_textEditingController.text);
                 },
                 child: const Text('Send'),
               ),
@@ -147,12 +147,20 @@ class _MessageInputState extends State<MessageInput> {
       ],
     ));
   }
+
+  void _onClickSend(String text) {
+    widget.onSendClick(text);
+    _textEditingController.clear();
+    widget.focusNode.unfocus();
+  }
 }
 
 class MessageList extends StatefulWidget {
   final List<Message> messages;
+  final ScrollController scrollController;
 
-  const MessageList({super.key, required this.messages});
+  const MessageList(
+      {super.key, required this.messages, required this.scrollController});
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -160,9 +168,16 @@ class MessageList extends StatefulWidget {
 
 class _MessageListState extends State<MessageList> {
   @override
+  void dispose() {
+    widget.scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
       reverse: true,
+      controller: widget.scrollController,
       itemCount: widget.messages.length,
       itemBuilder: (context, index) {
         return MessageCard(msg: widget.messages[index]);

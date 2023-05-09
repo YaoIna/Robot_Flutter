@@ -27,3 +27,15 @@ class UiStateCubit extends Cubit<UiState> {
     emit(state);
   }
 }
+
+class ScrollToTopCubit extends Cubit<int> {
+  ScrollToTopCubit() : super(0);
+
+  void updateCommand() {
+    if (state == 0) {
+      emit(1);
+    } else {
+      emit(-state);
+    }
+  }
+}

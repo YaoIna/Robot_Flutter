@@ -15,3 +15,5 @@ class UiError extends UiState {
 
   UiError(this.message);
 }
+
+enum ScrollCommand { scrollToTop, none }
