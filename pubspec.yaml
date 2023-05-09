@@ -41,6 +41,8 @@ dependencies:
   dart_numerics: ^0.0.6
   keyboard_attachable: ^2.1.0
   provider: ^6.0.5
+  flutter_bloc: ^8.1.2
+  equatable: ^2.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

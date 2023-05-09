@@ -1,11 +1,11 @@
 import 'package:dart_openai/openai.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:robot_chat_flutter/model/env.dart';
+import 'package:robot_chat_flutter/viewmodel/robot_bloc.dart';
 
 import '../model/message.dart';
 import '../model/ui_state.dart';
 
-class RobotChatViewModel with ChangeNotifier {
+class RobotChatViewModel {
   // late ApiKeyRepository _apiKeyRepository;
   OpenAI? _openAI;
 
@@ -14,13 +14,6 @@ class RobotChatViewModel with ChangeNotifier {
   String get apiKey => _apiKey;
 
   final List<OpenAIChatCompletionChoiceMessageModel> _currentMessageList = [];
-  final List<Message> _messageList = [];
-
-  List<Message> get messageList => _messageList;
-
-  UiState _uiState = Initial();
-
-  UiState get uiState => _uiState;
 
   // RobotChatViewModel(ApiKeyRepository apiKeyRepository) {
   //   _apiKeyRepository = apiKeyRepository;
@@ -37,19 +30,23 @@ class RobotChatViewModel with ChangeNotifier {
   //   });
   // }
 
+  final ListBloc _listBloc = ListBloc();
+
+  ListBloc get listBloc => _listBloc;
+
+  final UiStateCubit _uiStateCubit = UiStateCubit();
+
+  UiStateCubit get uiStateCubit => _uiStateCubit;
+
   void sendMessage(String messageContent) {
     if (messageContent.isEmpty) return;
     OpenAI.apiKey = Env.apiKey;
     final openAI = OpenAI.instance;
     if (openAI != null) {
-      _notifyChange(() {
-        _messageList.insert(0, Message(messageContent, Role.user));
-        _chatWithRobot(messageContent, openAI);
-      });
+      _listBloc.add(AddMessageEvent(Message(messageContent, Role.user)));
+      _chatWithRobot(messageContent, openAI);
     } else {
-      _notifyChange(() {
-        _uiState = UiError("Please enter your API key");
-      });
+      _uiStateCubit.updateState(UiError("Please enter your API key"));
     }
   }
 
@@ -63,24 +60,13 @@ class RobotChatViewModel with ChangeNotifier {
       if (result.choices.isEmpty) return;
       final message = result.choices.first.message;
       _currentMessageList.add(message);
-      _notifyChange(() {
-        _messageList.insert(
-            0,
-            Message(
-                message.content,
-                message.role == OpenAIChatMessageRole.user
-                    ? Role.user
-                    : Role.robot));
-      });
+      _listBloc.add(AddMessageEvent(Message(
+          message.content,
+          message.role == OpenAIChatMessageRole.user
+              ? Role.user
+              : Role.robot)));
     } on RequestFailedException catch (e) {
-      _notifyChange(() {
-        _uiState = UiError(e.message);
-      });
+      _uiStateCubit.updateState(UiError(e.message));
     }
-  }
-
-  void _notifyChange(VoidCallback callback) {
-    callback();
-    notifyListeners();
   }
 }
