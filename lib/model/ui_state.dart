@@ -10,8 +10,8 @@ class Success<T> extends UiState {
   Success(this.data);
 }
 
-class Error extends UiState {
+class UiError extends UiState {
   final String message;
 
-  Error(this.message);
+  UiError(this.message);
 }

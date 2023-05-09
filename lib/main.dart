@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
             .copyWith(secondary: const Color(0xFFCCC2DC)),
       ),
-      home: const ChatScreen(),
+      home: const Scaffold(body: ChatScreen()),
     );
   }
 }

@@ -48,7 +48,7 @@ class RobotChatViewModel with ChangeNotifier {
       });
     } else {
       _notifyChange(() {
-        _uiState = Error("Please enter your API key");
+        _uiState = UiError("Please enter your API key");
       });
     }
   }
@@ -74,7 +74,7 @@ class RobotChatViewModel with ChangeNotifier {
       });
     } on RequestFailedException catch (e) {
       _notifyChange(() {
-        _uiState = Error(e.message);
+        _uiState = UiError(e.message);
       });
     }
   }
